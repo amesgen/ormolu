@@ -1,5 +1,7 @@
 name: Build binaries
-on: [push]
+on:
+  release:
+    types: [created]
 jobs:
   build:
     strategy:
@@ -21,13 +23,17 @@ jobs:
             -v $(pwd):/mnt -w /mnt \
             utdemir/ghc-musl:v14-ghc8101 \
             bash .github/workflows/build.sh
-      - name: Build Windows/macOS binary
+      - name: Build ${{ runner.os }} binary
         if: runner.os != 'Linux'
         shell: bash
         run: |
           cabal build exe:ormolu
           cp $(find dist-newstyle \( -name ormolu -o -name ormolu.exe \) -type f) ormolu
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ormolu-${{ runner.os }}
-          path: ormolu
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ormolu
+          asset_name: ormolu-${{ runner.os }}
+          asset_content_type: application/octet-stream
