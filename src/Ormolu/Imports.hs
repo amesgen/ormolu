@@ -14,8 +14,8 @@ import Data.Function (on)
 import Data.List (foldl', nubBy, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
-import FastString (FastString)
 import GHC hiding (GhcPs, IE)
+import GHC.Data.FastString (FastString)
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp (IE (..))
 import Ormolu.Utils (notImplemented, showOutputable)
@@ -35,7 +35,6 @@ normalizeImports =
           { ideclHiding = second (fmap normalizeLies) <$> ideclHiding,
             ..
           }
-    g _ = notImplemented "XImportDecl"
 
 -- | Combine two import declarations. It should be assumed that 'ImportId's
 -- are equal.
@@ -53,7 +52,6 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
           _ -> Nothing,
         ..
       }
-combineImports _ _ = notImplemented "XImportDecl"
 
 -- | Import id, a collection of all things that justify having a separate
 -- import entry. This is used for merging of imports. If two imports have
@@ -62,7 +60,7 @@ data ImportId = ImportId
   { importIsPrelude :: Bool,
     importIdName :: ModuleName,
     importPkgQual :: Maybe FastString,
-    importSource :: Bool,
+    importSource :: IsBootInterface,
     importSafe :: Bool,
     importQualified :: Bool,
     importImplicit :: Bool,
@@ -91,7 +89,6 @@ importId (L _ ImportDecl {..}) =
   where
     isPrelude = moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
-importId _ = notImplemented "XImportDecl"
 
 -- | Normalize a collection of import\/export items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]
@@ -140,12 +137,10 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
                         IEGroup NoExtField _ _ -> notImplemented "IEGroup"
                         IEDoc NoExtField _ -> notImplemented "IEDoc"
                         IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
-                        XIE x -> noExtCon x
                     IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
                     IEGroup NoExtField _ _ -> notImplemented "IEGroup"
                     IEDoc NoExtField _ -> notImplemented "IEDoc"
                     IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
-                    XIE x -> noExtCon x
                in Just (f <$> old)
        in M.alter alter wname m
 
@@ -168,7 +163,6 @@ getIewn = \case
   IEGroup NoExtField _ _ -> notImplemented "IEGroup"
   IEDoc NoExtField _ -> notImplemented "IEDoc"
   IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
-  XIE x -> noExtCon x
 
 -- | Like 'compareIewn' for located wrapped names.
 compareLIewn :: LIEWrappedName RdrName -> LIEWrappedName RdrName -> Ordering

@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of types.
@@ -17,6 +18,7 @@ where
 
 import Data.Data (Data)
 import GHC hiding (isPromoted)
+import GHC.Types.Var
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
@@ -36,8 +38,10 @@ data TypeDocStyle
 
 p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
 p_hsType' multilineArgs docStyle = \case
-  HsForAllTy NoExtField visibility bndrs t -> do
-    p_forallBndrs visibility p_hsTyVarBndr bndrs
+  HsForAllTy NoExtField tele t -> do
+    case tele of
+      HsForAllInvis NoExtField bndrs -> p_forallBndrs tele p_hsTyVarBndr bndrs
+      HsForAllVis NoExtField bndrs -> p_forallBndrs tele p_hsTyVarBndr bndrs
     interArgBreak
     p_hsTypeR (unLoc t)
   HsQualTy NoExtField qs t -> do
@@ -81,10 +85,18 @@ p_hsType' multilineArgs docStyle = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy NoExtField x y@(L _ y') -> do
+  HsFunTy NoExtField arrow x y@(L _ y') -> do
     located x p_hsType
     space
-    txt "->"
+    -- TODO unicode syntax
+    case arrow of
+      HsUnrestrictedArrow _ -> txt "->"
+      HsLinearArrow _ -> txt "%1 ->"
+      HsExplicitMult _ mult -> do
+        txt "%"
+        p_hsTypeR (unLoc mult)
+        space
+        txt "->"
     interArgBreak
     case y' of
       HsFunTy {} -> p_hsTypeR y'
@@ -185,8 +197,8 @@ p_hsType' multilineArgs docStyle = \case
 hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
   HsDocTy {} -> True
-  HsFunTy _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
-  HsForAllTy _ _ _ (L _ x) -> hasDocStrings x
+  HsFunTy _ _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
+  HsForAllTy _ _ (L _ x) -> hasDocStrings x
   HsQualTy _ _ (L _ x) -> hasDocStrings x
   _ -> False
 
@@ -196,22 +208,33 @@ p_hsContext = \case
   [x] -> located x p_hsType
   xs -> parens N $ sep commaDel (sitcc . located' p_hsType) xs
 
-p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
+class IsInferredTyVarBndr flag where
+  isInferred :: flag -> Bool
+
+instance IsInferredTyVarBndr () where
+  isInferred () = False
+
+instance IsInferredTyVarBndr Specificity where
+  isInferred = \case
+    InferredSpec -> True
+    SpecifiedSpec -> False
+
+-- TODO tests for this
+p_hsTyVarBndr :: IsInferredTyVarBndr flag => HsTyVarBndr flag GhcPs -> R ()
 p_hsTyVarBndr = \case
-  UserTyVar NoExtField x ->
-    p_rdrName x
-  KindedTyVar NoExtField l k -> parens N $ do
+  UserTyVar NoExtField flag x ->
+    (if isInferred flag then braces N else id) $ p_rdrName x
+  KindedTyVar NoExtField flag l k -> (if isInferred flag then braces else parens) N $ do
     located l atom
     space
     txt "::"
     breakpoint
     inci (located k p_hsType)
-  XTyVarBndr x -> noExtCon x
 
 -- | Render several @forall@-ed variables.
-p_forallBndrs :: Data a => ForallVisFlag -> (a -> R ()) -> [Located a] -> R ()
-p_forallBndrs ForallInvis _ [] = txt "forall."
-p_forallBndrs ForallVis _ [] = txt "forall ->"
+p_forallBndrs :: Data a => HsForAllTelescope GhcPs -> (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs HsForAllInvis {} _ [] = txt "forall."
+p_forallBndrs HsForAllVis {} _ [] = txt "forall ->"
 p_forallBndrs vis p tyvars =
   switchLayout (getLoc <$> tyvars) $ do
     txt "forall"
@@ -219,8 +242,8 @@ p_forallBndrs vis p tyvars =
     inci $ do
       sitcc $ sep breakpoint (sitcc . located' p) tyvars
       case vis of
-        ForallInvis -> txt "."
-        ForallVis -> space >> txt "->"
+        HsForAllInvis {} -> txt "."
+        HsForAllVis {} -> space >> txt "->"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =
@@ -238,7 +261,6 @@ p_conDeclField ConDeclField {..} = do
   txt "::"
   breakpoint
   sitcc . inci $ p_hsType (unLoc cd_fld_type)
-p_conDeclField (XConDeclField x) = noExtCon x
 
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
 tyOpTree (L _ (HsOpTy NoExtField l op r)) =
@@ -260,14 +282,12 @@ p_tyOpTree (OpBranch l op r) = do
 -- Conversion functions
 
 tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
-tyVarsToTypes = \case
-  HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
-  XLHsQTyVars x -> noExtCon x
+tyVarsToTypes HsQTvs {..} = fmap tyVarToType <$> hsq_explicit
 
-tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
+tyVarToType :: HsTyVarBndr () GhcPs -> HsType GhcPs
 tyVarToType = \case
-  UserTyVar NoExtField tvar -> HsTyVar NoExtField NotPromoted tvar
-  KindedTyVar NoExtField tvar kind ->
+  UserTyVar NoExtField () tvar -> HsTyVar NoExtField NotPromoted tvar
+  KindedTyVar NoExtField () tvar kind ->
     -- Note: we always add parentheses because for whatever reason GHC does
     -- not use HsParTy for left-hand sides of declarations. Please see
     -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
@@ -275,4 +295,3 @@ tyVarToType = \case
     -- declarations.
     HsParTy NoExtField . noLoc $
       HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
-  XTyVarBndr x -> noExtCon x

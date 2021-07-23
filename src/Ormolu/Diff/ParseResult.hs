@@ -1,7 +1,9 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult
@@ -76,6 +78,8 @@ matchIgnoringSrcSpans = genericQuery
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
                 `extQ` importDeclQualifiedStyleEq
+                `extQ` unicodeArrowStyleEq
+                `extQ` classDeclEq
                 `ext2Q` forLocated
             )
             x
@@ -122,3 +126,20 @@ matchIgnoringSrcSpans = genericQuery
         fresh = not $ any (`isSubspanOf` s) ss
         helpful = isGoodSrcSpan s
     appendSpan _ d = d
+    -- NOTE preserve unicode instead?
+    -- signature/type/unicode.hs
+    unicodeArrowStyleEq :: HsArrow GhcPs -> GenericQ ParseResultDiff
+    unicodeArrowStyleEq (HsUnrestrictedArrow _) (castArrow -> Just (HsUnrestrictedArrow _)) = Same
+    unicodeArrowStyleEq (HsLinearArrow _) (castArrow -> Just (HsLinearArrow _)) = Same
+    unicodeArrowStyleEq (HsExplicitMult _ t) (castArrow -> Just (HsExplicitMult _ t')) = genericQuery t t'
+    unicodeArrowStyleEq _ _ = Different []
+    castArrow :: Data a => a -> Maybe (HsArrow GhcPs)
+    castArrow = cast
+    -- TODO better way to ignore this? ignore LayoutInfo?
+    -- XClassDecl GhcPs ~ LayoutInfo
+    classDeclEq :: TyClDecl GhcPs -> GenericQ ParseResultDiff
+    classDeclEq d@ClassDecl {tcdCExt} (castDecl -> Just (d'@ClassDecl {})) =
+      genericQuery d d' {tcdCExt = tcdCExt}
+    classDeclEq d d' = genericQuery d d'
+    castDecl :: Data a => a -> Maybe (TyClDecl GhcPs)
+    castDecl = cast

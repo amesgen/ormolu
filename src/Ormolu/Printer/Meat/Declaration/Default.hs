@@ -11,10 +11,8 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Type
 
 p_defaultDecl :: DefaultDecl GhcPs -> R ()
-p_defaultDecl = \case
-  DefaultDecl NoExtField ts -> do
-    txt "default"
-    breakpoint
-    inci . parens N $
-      sep commaDel (sitcc . located' p_hsType) ts
-  XDefaultDecl x -> noExtCon x
+p_defaultDecl (DefaultDecl NoExtField ts) = do
+  txt "default"
+  breakpoint
+  inci . parens N $
+    sep commaDel (sitcc . located' p_hsType) ts

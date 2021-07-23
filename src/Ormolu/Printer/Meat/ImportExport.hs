@@ -32,7 +32,7 @@ p_hsmodImport :: Bool -> ImportDecl GhcPs -> R ()
 p_hsmodImport useQualifiedPost ImportDecl {..} = do
   txt "import"
   space
-  when ideclSource (txt "{-# SOURCE #-}")
+  when (ideclSource == IsBoot) (txt "{-# SOURCE #-}")
   space
   when ideclSafe (txt "safe")
   space
@@ -72,7 +72,6 @@ p_hsmodImport useQualifiedPost ImportDecl {..} = do
             (\(p, l) -> sitcc (located l (p_lie layout p)))
             (attachRelativePos xs)
     newline
-p_hsmodImport _ (XImportDecl x) = noExtCon x
 
 p_lie :: Layout -> RelativePos -> IE GhcPs -> R ()
 p_lie encLayout relativePos = \case
@@ -113,7 +112,6 @@ p_lie encLayout relativePos = \case
   IEDoc NoExtField str ->
     p_hsDocString Pipe False (noLoc str)
   IEDocNamed NoExtField str -> p_hsDocName str
-  XIE x -> noExtCon x
   where
     p_comma =
       case encLayout of

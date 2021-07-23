@@ -37,4 +37,3 @@ p_synDecl name fixity HsQTvs {..} t = do
     then newline
     else breakpoint
   inci (located t p_hsType)
-p_synDecl _ _ (XLHsQTyVars x) _ = noExtCon x

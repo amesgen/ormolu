@@ -7,7 +7,6 @@ module Ormolu.Printer.Meat.Declaration.Warning
   )
 where
 
-import BasicTypes
 import Data.Foldable
 import Data.Text (Text)
 import GHC
@@ -17,12 +16,10 @@ import Ormolu.Printer.Meat.Common
 p_warnDecls :: WarnDecls GhcPs -> R ()
 p_warnDecls (Warnings NoExtField _ warnings) =
   traverse_ (located' p_warnDecl) warnings
-p_warnDecls (XWarnDecls x) = noExtCon x
 
 p_warnDecl :: WarnDecl GhcPs -> R ()
 p_warnDecl (Warning NoExtField functions warningTxt) =
   p_topLevelWarning functions warningTxt
-p_warnDecl (XWarnDecl x) = noExtCon x
 
 p_moduleWarning :: WarningTxt -> R ()
 p_moduleWarning wtxt = do

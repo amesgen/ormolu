@@ -1,6 +1,9 @@
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+
+-- TODO why is GADTs necessary?
 
 -- | Renedring of data type declarations.
 module Ormolu.Printer.Meat.Declaration.Data
@@ -83,7 +86,6 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs ->
     sep newline (located' p_hsDerivingClause) xs
-p_dataDecl _ _ _ _ (XHsDataDefn x) = noExtCon x
 
 p_conDecl ::
   Bool ->
@@ -95,7 +97,7 @@ p_conDecl singleConstRec = \case
     let conDeclSpn =
           fmap getLoc con_names
             <> [getLoc con_forall]
-            <> conTyVarsSpans con_qvars
+            <> fmap getLoc con_qvars
             <> maybeToList (fmap getLoc con_mb_cxt)
             <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
@@ -115,16 +117,18 @@ p_conDecl singleConstRec = \case
                 else breakpoint
         interArgBreak
         conTy <- case con_args of
-          PrefixCon [] -> pure con_res_ty
-          PrefixCon _ -> notImplemented "GADT PrefixCon"
+          PrefixCon xs ->
+            let go (HsScaled a b) t = L (combineLocs t b) (HsFunTy NoExtField a b t)
+             in pure $ foldr go con_res_ty xs
           RecCon r@(L l rs) ->
             pure
               . L (combineLocs r con_res_ty)
               $ HsFunTy
                 NoExtField
+                (HsUnrestrictedArrow NormalSyntax) -- TODO UnicodeSyntax
                 (L l $ HsRecTy NoExtField rs)
                 con_res_ty
-          InfixCon _ _ -> notImplemented "InfixCon"
+          InfixCon _ _ -> notImplemented "InfixCon" -- TODO unreachable?
         let qualTy = case con_mb_cxt of
               Nothing -> conTy
               Just qs ->
@@ -134,7 +138,7 @@ p_conDecl singleConstRec = \case
               if unLoc con_forall
                 then
                   L (combineLocs con_forall qualTy) $
-                    HsForAllTy NoExtField ForallInvis (hsq_explicit con_qvars) qualTy
+                    HsForAllTy NoExtField (mkHsForAllInvisTele con_qvars) qualTy
                 else qualTy
         p_hsType (unLoc quantifiedTy)
   ConDeclH98 {..} -> do
@@ -148,40 +152,36 @@ p_conDecl singleConstRec = \case
           getLoc con_name : conArgsSpans con_args
     switchLayout conDeclWithContextSpn $ do
       when (unLoc con_forall) $ do
-        p_forallBndrs ForallInvis p_hsTyVarBndr con_ex_tvs
+        p_forallBndrs (mkHsForAllInvisTele []) p_hsTyVarBndr con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
       switchLayout conDeclSpn $ case con_args of
         PrefixCon xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
-          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) xs
+          -- TODO ensure that the HsArrow in HsScaled can be ignored
+          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) (hsScaledThing <$> xs)
         RecCon l -> do
           p_rdrName con_name
           breakpoint
           inciIf (not singleConstRec) (located l p_conDeclFields)
-        InfixCon x y -> do
+        -- TODO ensure that the HsArrow in HsScaled can be ignored
+        InfixCon (HsScaled _ x) (HsScaled _ y) -> do
           located x p_hsType
           breakpoint
           inci $ do
             p_rdrName con_name
             space
             located y p_hsType
-  XConDecl x -> noExtCon x
 
 conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
 conArgsSpans = \case
   PrefixCon xs ->
-    getLoc <$> xs
+    getLoc . hsScaledThing <$> xs
   RecCon l ->
     [getLoc l]
   InfixCon x y ->
-    [getLoc x, getLoc y]
-
-conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
-conTyVarsSpans = \case
-  HsQTvs {..} -> getLoc <$> hsq_explicit
-  XLHsQTyVars x -> noExtCon x
+    getLoc . hsScaledThing <$> [x, y]
 
 p_lhsContext ::
   LHsContext GhcPs ->
@@ -198,7 +198,6 @@ isGadt :: ConDecl GhcPs -> Bool
 isGadt = \case
   ConDeclGADT {} -> True
   ConDeclH98 {} -> False
-  XConDecl {} -> False
 
 p_hsDerivingClause ::
   HsDerivingClause GhcPs ->
@@ -239,9 +238,6 @@ p_hsDerivingClause HsDerivingClause {..} = do
           txt "via"
           space
           located hsib_body p_hsType
-      ViaStrategy (XHsImplicitBndrs x) ->
-        noExtCon x
-p_hsDerivingClause (XHsDerivingClause x) = noExtCon x
 
 ----------------------------------------------------------------------------
 -- Helpers
