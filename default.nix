@@ -1,6 +1,6 @@
 { pkgs ? (import ./nix/nixpkgs { inherit system; })
 , system ? builtins.currentSystem
-, ormoluCompiler ? "ghc8103"
+, ormoluCompiler ? "ghc8104"
 }:
 
 let
@@ -17,6 +17,7 @@ let
   };
   ormoluOverlay = self: super: {
     "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
+    "ghc-lib-parser" = pkgs.haskellPackages.ghc-lib-parser_9_0_1_20210324;
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -24,10 +25,8 @@ let
   };
   expectedFailures = [
     "Agda"
-    "aws"
-    "distributed-process"
     "esqueleto"
-    "fay"
+    "haxl"
     "hlint"
     "idris"
     "intero"
@@ -36,7 +35,6 @@ let
     "pipes"
     "postgrest"
     "purescript"
-    "tensorflow"
   ];
   ormolizedPackages = doCheck:
     pkgs.lib.mapAttrs (name: p: ormolize {
@@ -111,7 +109,7 @@ in {
       "servant-server"
       "stack"
       "tensorflow"
-      "text_1_2_4_0"
+      "text_1_2_4_1"
       "tls"
       "yesod-core"
     ];
