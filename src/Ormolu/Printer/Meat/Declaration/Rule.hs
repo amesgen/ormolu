@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Ormolu.Printer.Meat.Declaration.Rule
   ( p_ruleDecls,
@@ -31,15 +32,13 @@ p_ruleDecl (HsRule NoExtField ruleName activation tyvars ruleBndrs lhs rhs) = do
   case tyvars of
     Nothing -> return ()
     Just xs -> do
-      -- TODO really invis?
-      p_forallBndrs (mkHsForAllInvisTele []) p_hsTyVarBndr xs
+      p_forallBndrs ForAllInvis p_hsTyVarBndr xs
       space
   -- It appears that there is no way to tell if there was an empty forall
   -- in the input or no forall at all. We do not want to add redundant
   -- foralls, so let's just skip the empty ones.
   unless (null ruleBndrs) $
-    -- TODO invis?
-    p_forallBndrs (mkHsForAllInvisTele []) p_ruleBndr ruleBndrs
+    p_forallBndrs ForAllInvis p_ruleBndr ruleBndrs
   breakpoint
   inci $ do
     located lhs p_hsExpr
@@ -55,6 +54,6 @@ p_ruleName (_, name) = atom $ (HsString NoSourceText name :: HsLit GhcPs)
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case
   RuleBndr NoExtField x -> p_rdrName x
-  RuleBndrSig NoExtField x hswc -> parens N $ do
+  RuleBndrSig NoExtField x HsPS {..} -> parens N $ do
     p_rdrName x
-    p_typeAscription . mkHsWildCardBndrs . mkHsImplicitBndrs . hsps_body $ hswc -- TODO change type of p_typeAscription?
+    p_typeAscription (HsWC NoExtField (HsIB NoExtField hsps_body))

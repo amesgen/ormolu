@@ -3,8 +3,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- TODO why is GADTs necessary?
-
 -- | Renedring of data type declarations.
 module Ormolu.Printer.Meat.Declaration.Data
   ( p_dataDecl,
@@ -131,10 +129,10 @@ p_conDecl singleConstRec = \case
               . L (combineLocs r con_res_ty)
               $ HsFunTy
                 NoExtField
-                (HsUnrestrictedArrow NormalSyntax) -- TODO UnicodeSyntax
+                (HsUnrestrictedArrow NormalSyntax)
                 (L l $ HsRecTy NoExtField rs)
                 con_res_ty
-          InfixCon _ _ -> notImplemented "InfixCon" -- TODO unreachable?
+          InfixCon _ _ -> notImplemented "InfixCon" -- NOTE(amesgen) should be unreachable
         let qualTy = case con_mb_cxt of
               Nothing -> conTy
               Just qs ->
@@ -158,20 +156,18 @@ p_conDecl singleConstRec = \case
           getLoc con_name : conArgsSpans con_args
     switchLayout conDeclWithContextSpn $ do
       when (unLoc con_forall) $ do
-        p_forallBndrs (mkHsForAllInvisTele []) p_hsTyVarBndr con_ex_tvs
+        p_forallBndrs ForAllInvis p_hsTyVarBndr con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
       switchLayout conDeclSpn $ case con_args of
         PrefixCon xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
-          -- TODO ensure that the HsArrow in HsScaled can be ignored
           inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) (hsScaledThing <$> xs)
         RecCon l -> do
           p_rdrName con_name
           breakpoint
           inciIf (not singleConstRec) (located l p_conDeclFields)
-        -- TODO ensure that the HsArrow in HsScaled can be ignored
         InfixCon (HsScaled _ x) (HsScaled _ y) -> do
           located x p_hsType
           breakpoint

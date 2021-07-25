@@ -78,7 +78,6 @@ p_clsInstDecl ClsInstDecl {..} = do
         )
           <$> cid_datafam_insts
       allDecls =
-        -- TODO ?
         snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
   located hsib_body $ \x -> do
     breakpoint

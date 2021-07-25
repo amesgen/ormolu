@@ -10,6 +10,7 @@ module Ormolu.Printer.Meat.Type
     hasDocStrings,
     p_hsContext,
     p_hsTyVarBndr,
+    ForAllVisibility (..),
     p_forallBndrs,
     p_conDeclFields,
     tyVarsToTypes,
@@ -44,8 +45,8 @@ p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
 p_hsType' multilineArgs docStyle = \case
   HsForAllTy NoExtField tele t -> do
     case tele of
-      HsForAllInvis NoExtField bndrs -> p_forallBndrs tele p_hsTyVarBndr bndrs
-      HsForAllVis NoExtField bndrs -> p_forallBndrs tele p_hsTyVarBndr bndrs
+      HsForAllInvis NoExtField bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
+      HsForAllVis NoExtField bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
     interArgBreak
     p_hsTypeR (unLoc t)
   HsQualTy NoExtField qs t -> do
@@ -92,7 +93,6 @@ p_hsType' multilineArgs docStyle = \case
   HsFunTy NoExtField arrow x y@(L _ y') -> do
     located x p_hsType
     space
-    -- TODO unicode syntax
     case arrow of
       HsUnrestrictedArrow _ -> txt "->"
       HsLinearArrow _ -> txt "%1 ->"
@@ -223,7 +223,6 @@ instance IsInferredTyVarBndr Specificity where
     InferredSpec -> True
     SpecifiedSpec -> False
 
--- TODO tests for this
 p_hsTyVarBndr :: IsInferredTyVarBndr flag => HsTyVarBndr flag GhcPs -> R ()
 p_hsTyVarBndr = \case
   UserTyVar NoExtField flag x ->
@@ -235,10 +234,12 @@ p_hsTyVarBndr = \case
     breakpoint
     inci (located k p_hsType)
 
+data ForAllVisibility = ForAllInvis | ForAllVis
+
 -- | Render several @forall@-ed variables.
-p_forallBndrs :: Data a => HsForAllTelescope GhcPs -> (a -> R ()) -> [Located a] -> R ()
-p_forallBndrs HsForAllInvis {} _ [] = txt "forall."
-p_forallBndrs HsForAllVis {} _ [] = txt "forall ->"
+p_forallBndrs :: Data a => ForAllVisibility -> (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs ForAllInvis _ [] = txt "forall."
+p_forallBndrs ForAllVis _ [] = txt "forall ->"
 p_forallBndrs vis p tyvars =
   switchLayout (getLoc <$> tyvars) $ do
     txt "forall"
@@ -246,8 +247,8 @@ p_forallBndrs vis p tyvars =
     inci $ do
       sitcc $ sep breakpoint (sitcc . located' p) tyvars
       case vis of
-        HsForAllInvis {} -> txt "."
-        HsForAllVis {} -> space >> txt "->"
+        ForAllInvis -> txt "."
+        ForAllVis -> space >> txt "->"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =

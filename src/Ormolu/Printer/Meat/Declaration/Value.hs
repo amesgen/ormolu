@@ -253,7 +253,6 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
                 else EqualSign
         sep newline (located' (p_grhs' placer render groupStyle)) grhssGRHSs
       p_where = do
-        -- TODO isEmptyLocalBindsPR
         let whereIsEmpty = eqEmptyLocalBinds (unLoc grhssLocalBinds)
         unless (eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
           breakpoint
@@ -484,7 +483,7 @@ p_hsLocalBinds = \case
         p_item' (p, item) =
           positionToBracing p $
             withSpacing (either p_valDecl p_sigDecl) item
-        binds = sortBy (leftmost_smallest `on` getLoc) items -- TODO ?
+        binds = sortBy (leftmost_smallest `on` getLoc) items
     sitcc $ sepSemi p_item' (attachRelativePos binds)
   HsValBinds NoExtField _ -> notImplemented "HsValBinds"
   HsIPBinds NoExtField (IPBinds NoExtField xs) ->
@@ -613,7 +612,7 @@ p_hsExpr' s = \case
   OpApp NoExtField x op y -> do
     let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
     p_exprOpTree s (reassociateOpTree getOpName opTree)
-  NegApp NoExtField e _ -> do
+  NegApp NoExtField e NoExtField -> do
     -- TODO LexicalNegation
     txt "-"
     space
@@ -998,9 +997,9 @@ p_pat = \case
       txt "+"
       space
       located k (atom . ol_val)
-  SigPat NoExtField pat hswc -> do
+  SigPat NoExtField pat HsPS {..} -> do
     located pat p_pat
-    p_typeAscription . mkHsWildCardBndrs . mkHsImplicitBndrs . hsps_body $ hswc -- TODO change type of p_typeAscription?
+    p_typeAscription (HsWC NoExtField (HsIB NoExtField hsps_body))
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_pat_hsRecField HsRecField {..} = do
@@ -1050,7 +1049,6 @@ p_hsSpliceTH ::
   SpliceDecoration ->
   R ()
 p_hsSpliceTH isTyped expr = \case
-  -- TODO HasParens
   DollarSplice -> do
     txt decoSymbol
     located expr (sitcc . p_hsExpr)

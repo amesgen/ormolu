@@ -255,7 +255,6 @@ pattern AnnTypePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (TypeAnnPr
 pattern AnnValuePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (ValueAnnProvenance (L _ n)) _)
 pattern Pattern n <- ValD NoExtField (PatSynBind NoExtField (PSB _ (L _ n) _ _ _))
 pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _)
--- TODO XClassDecl GhcPs ~ LayoutInfo
 pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD NoExtField (StandaloneKindSig NoExtField (L _ n) _)
 pattern FamilyDeclaration n <- TyClD NoExtField (FamDecl NoExtField (FamilyDecl NoExtField _ (L _ n) _ _ _ _))

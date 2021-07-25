@@ -129,7 +129,6 @@ setDefaultExts flags = L.foldl' xopt_set flags autoExts
 -- by user.
 manualExts :: [Extension]
 manualExts =
-  -- TODO new?
   [ Arrows, -- steals proc
     Cpp, -- forbidden
     BangPatterns, -- makes certain patterns with ! fail
@@ -139,7 +138,6 @@ manualExts =
     TransformListComp, -- steals the group keyword
     UnboxedTuples, -- breaks (#) lens operator
     MagicHash, -- screws {-# these things #-}
-    TypeApplications, -- steals (@) operator on some cases
     AlternativeLayoutRule,
     AlternativeLayoutRuleTransitional,
     MonadComprehensions,
@@ -151,7 +149,8 @@ manualExts =
     -- weird ways
     ImportQualifiedPost, -- affects how Ormolu renders imports, so the
     -- decision of enabling this style is left to the user
-    LexicalNegation -- TODO this breaks e.g. instance/newlines-between-methods.hs
+    LexicalNegation, -- this breaks e.g. declaration/value/function/negation.hs
+    LinearTypes -- steals the (%) type operator in some cases
   ]
 
 -- | Run a 'GHC.P' computation.

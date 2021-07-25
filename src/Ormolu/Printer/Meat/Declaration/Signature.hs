@@ -167,7 +167,7 @@ p_activation = \case
     txt "["
     atom n
     txt "]"
-  FinalActive -> notImplemented "FinalActive" -- TODO can this occur?
+  FinalActive -> notImplemented "FinalActive" -- NOTE(amesgen) is this unreachable or just not implemented?
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
 p_specInstSig hsib =

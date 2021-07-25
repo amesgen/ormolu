@@ -87,8 +87,7 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
   case feqn_bndrs of
     Nothing -> return ()
     Just bndrs -> do
-      -- TODO HsForAllInvis ugly
-      p_forallBndrs (mkHsForAllInvisTele []) p_hsTyVarBndr bndrs
+      p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
       breakpoint
   inciIf (not $ null feqn_bndrs) $ do
     let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats

@@ -42,8 +42,7 @@ p_hsModule mstackHeader shebangs pragmas qualifiedPost HsModule {..} = do
       exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
   switchLayout (deprecSpan <> exportSpans) $ do
     forM_ shebangs $ \(Shebang x) ->
-      -- TODO realLocated?
-      located ((\(L l e) -> L (RealSrcSpan l Nothing) e) x) $ \shebang -> do
+      realLocated x $ \shebang -> do
         txt (T.pack shebang)
         newline
     forM_ mstackHeader $ \(L spn comment) -> do
