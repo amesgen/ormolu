@@ -114,9 +114,7 @@ library
         Ormolu.Utils
 
     hs-source-dirs:   src
-    other-modules:
-        GHC.DynFlags
-
+    other-modules:    GHC.DynFlags
     default-language: Haskell2010
     build-depends:
         Diff >=0.4 && <1.0,
