@@ -12,6 +12,7 @@ module Ormolu.Printer.Combinators
     runR,
     getAnns,
     getEnclosingSpan,
+    isExtensionEnabled,
 
     -- * Combinators
 

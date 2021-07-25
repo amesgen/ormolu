@@ -109,8 +109,7 @@ parseModule Config {..} path rawInput = liftIO $ do
                         prPragmas = pragmas,
                         prCommentStream = comments,
                         prUseRecordDot = useRecordDot,
-                        prImportQualifiedPost =
-                          GHC.xopt ImportQualifiedPost dynFlags,
+                        prExtensions = GHC.extensionFlags dynFlags,
                         prLiteralPrefix = T.pack literalPrefix,
                         prLiteralSuffix = T.pack literalSuffix,
                         prIndent = indent

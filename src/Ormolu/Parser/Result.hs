@@ -8,7 +8,9 @@ module Ormolu.Parser.Result
 where
 
 import Data.Text (Text)
+import GHC.Data.EnumSet (EnumSet)
 import GHC.Hs
+import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
@@ -31,8 +33,8 @@ data ParseResult = ParseResult
     prCommentStream :: CommentStream,
     -- | Whether or not record dot syntax is enabled
     prUseRecordDot :: Bool,
-    -- | Whether or not ImportQualifiedPost is enabled
-    prImportQualifiedPost :: Bool,
+    -- | Enabled extensions
+    prExtensions :: EnumSet Extension,
     -- | Literal prefix
     prLiteralPrefix :: Text,
     -- | Literal suffix

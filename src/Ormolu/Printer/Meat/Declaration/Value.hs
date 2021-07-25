@@ -31,6 +31,7 @@ import GHC.Hs.Extension
 import GHC.Hs.Lit
 import GHC.Hs.Pat
 import GHC.Hs.Type
+import GHC.LanguageExtensions.Type (Extension (LexicalNegation))
 import GHC.Parser.Annotation
 import GHC.Parser.CharClass (is_space)
 import GHC.Types.Basic
@@ -613,9 +614,9 @@ p_hsExpr' s = \case
     let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
     p_exprOpTree s (reassociateOpTree getOpName opTree)
   NegApp NoExtField e NoExtField -> do
-    -- TODO LexicalNegation
+    lexicalNegation <- isExtensionEnabled LexicalNegation
     txt "-"
-    space
+    unless lexicalNegation space
     located e p_hsExpr
   HsPar NoExtField e ->
     parens s (located e (dontUseBraces . p_hsExpr))

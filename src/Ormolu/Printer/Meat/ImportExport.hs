@@ -12,6 +12,7 @@ where
 import Control.Monad
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp
+import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import GHC.Unit.Types
 import Ormolu.Printer.Combinators
@@ -31,8 +32,9 @@ p_hsmodExports xs =
       (\(p, l) -> sitcc (located l (p_lie layout p)))
       (attachRelativePos xs)
 
-p_hsmodImport :: Bool -> ImportDecl GhcPs -> R ()
-p_hsmodImport useQualifiedPost ImportDecl {..} = do
+p_hsmodImport :: ImportDecl GhcPs -> R ()
+p_hsmodImport ImportDecl {..} = do
+  useQualifiedPost <- isExtensionEnabled ImportQualifiedPost
   txt "import"
   space
   when (ideclSource == IsBoot) (txt "{-# SOURCE #-}")
