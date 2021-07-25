@@ -18,9 +18,14 @@ where
 import Control.Monad
 import Data.List (isPrefixOf)
 import qualified Data.Text as T
-import GHC hiding (GhcPs, IE)
+import GHC.Hs.Doc
+import GHC.Hs.ImpExp
+import GHC.Parser.Annotation
 import GHC.Types.Name (nameStableString)
 import GHC.Types.Name.Occurrence (OccName (..))
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
+import GHC.Unit.Module.Name
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
 

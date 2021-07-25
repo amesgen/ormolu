@@ -9,7 +9,11 @@ where
 
 import Data.Foldable
 import Data.Text (Text)
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 

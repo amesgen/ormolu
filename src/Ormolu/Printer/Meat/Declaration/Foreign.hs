@@ -9,8 +9,12 @@ where
 
 import Control.Monad
 import Data.Text
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
 import GHC.Types.ForeignCall
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature

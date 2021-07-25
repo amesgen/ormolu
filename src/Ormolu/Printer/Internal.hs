@@ -62,7 +62,8 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Builder
-import GHC
+import GHC.Parser.Annotation
+import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream

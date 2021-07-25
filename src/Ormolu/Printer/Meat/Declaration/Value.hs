@@ -24,10 +24,19 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified Data.Text as Text
-import GHC
 import GHC.Data.Bag (bagToList)
+import GHC.Hs.Binds
+import GHC.Hs.Expr
+import GHC.Hs.Extension
+import GHC.Hs.Lit
+import GHC.Hs.Pat
+import GHC.Hs.Type
+import GHC.Parser.Annotation
 import GHC.Parser.CharClass (is_space)
+import GHC.Types.Basic
 import GHC.Types.Name.Occurrence (occNameString)
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal
 import Ormolu.Printer.Meat.Common
@@ -246,7 +255,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
       p_where = do
         -- TODO isEmptyLocalBindsPR
         let whereIsEmpty = eqEmptyLocalBinds (unLoc grhssLocalBinds)
-        unless (GHC.eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
+        unless (eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
           breakpoint
           txt "where"
           unless whereIsEmpty breakpoint

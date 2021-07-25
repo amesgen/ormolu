@@ -9,34 +9,34 @@ where
 
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
-import qualified GHC
-import qualified GHC.Parser.Lexer as GHC
+import GHC.Parser.Annotation
+import GHC.Parser.Lexer
 import GHC.Types.SrcLoc
 
 -- | Ormolu-specific representation of GHC annotations.
-newtype Anns = Anns (Map RealSrcSpan [GHC.AnnKeywordId])
+newtype Anns = Anns (Map RealSrcSpan [AnnKeywordId])
   deriving (Eq)
 
 -- | Empty 'Anns'.
 emptyAnns :: Anns
 emptyAnns = Anns M.empty
 
--- | Create 'Anns' from 'GHC.PState'.
+-- | Create 'Anns' from 'PState'.
 mkAnns ::
-  GHC.PState ->
+  PState ->
   Anns
 mkAnns pstate =
   Anns $
-    M.fromListWith (++) (f <$> GHC.annotations pstate)
+    M.fromListWith (++) (f <$> annotations pstate)
   where
     f ((rspn, kid), _) = (rspn, [kid])
 
--- | Lookup 'GHC.AnnKeywordId's corresponding to a given 'SrcSpan'.
+-- | Lookup 'AnnKeywordId's corresponding to a given 'SrcSpan'.
 lookupAnns ::
   -- | Span to lookup with
   SrcSpan ->
   -- | Collection of annotations
   Anns ->
-  [GHC.AnnKeywordId]
+  [AnnKeywordId]
 lookupAnns (RealSrcSpan rspn _) (Anns m) = M.findWithDefault [] rspn m
 lookupAnns (UnhelpfulSpan _) _ = []

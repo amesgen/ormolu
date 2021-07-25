@@ -13,8 +13,14 @@ import Control.Monad
 import Data.Foldable
 import Data.Function (on)
 import Data.List (sortBy)
-import GHC
 import GHC.Core.Class
+import GHC.Hs.Binds
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration

@@ -7,7 +7,11 @@ module Ormolu.Printer.Meat.Declaration.Rule
 where
 
 import Control.Monad (unless)
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Lit
+import GHC.Hs.Type
+import GHC.Types.Basic
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature

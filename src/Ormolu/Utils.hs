@@ -27,8 +27,9 @@ import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import GHC
 import GHC.DynFlags (baseDynFlags)
+import GHC.Hs
+import GHC.Types.SrcLoc
 import qualified GHC.Utils.Outputable as GHC
 
 -- | Relative positions in a list.

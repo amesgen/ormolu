@@ -17,7 +17,9 @@ where
 
 import Data.ByteString (ByteString)
 import Data.Generics
-import GHC
+import GHC.Hs
+import GHC.Types.Basic
+import GHC.Types.SrcLoc
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result

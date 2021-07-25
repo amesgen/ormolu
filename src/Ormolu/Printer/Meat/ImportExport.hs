@@ -10,7 +10,10 @@ module Ormolu.Printer.Meat.ImportExport
 where
 
 import Control.Monad
-import GHC
+import GHC.Hs.Extension
+import GHC.Hs.ImpExp
+import GHC.Types.SrcLoc
+import GHC.Unit.Types
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Utils (RelativePos (..), attachRelativePos)

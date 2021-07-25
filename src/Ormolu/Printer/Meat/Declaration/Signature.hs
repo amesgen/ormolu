@@ -12,8 +12,14 @@ module Ormolu.Printer.Meat.Declaration.Signature
 where
 
 import Control.Monad
-import GHC
 import GHC.Data.BooleanFormula
+import GHC.Hs.Binds
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type

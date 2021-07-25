@@ -17,7 +17,11 @@ module Ormolu.Printer.Meat.Type
 where
 
 import Data.Data (Data)
-import GHC hiding (isPromoted)
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic hiding (isPromoted)
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import GHC.Types.Var
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common

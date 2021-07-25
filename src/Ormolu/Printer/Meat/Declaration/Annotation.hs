@@ -6,7 +6,8 @@ module Ormolu.Printer.Meat.Declaration.Annotation
   )
 where
 
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Value

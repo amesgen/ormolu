@@ -14,10 +14,14 @@ import Data.Function (on)
 import Data.List (foldl', nubBy, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
-import GHC hiding (GhcPs, IE)
 import GHC.Data.FastString (FastString)
 import GHC.Hs.Extension
-import GHC.Hs.ImpExp (IE (..))
+import GHC.Hs.ImpExp as GHC
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
+import GHC.Unit.Module.Name
+import GHC.Unit.Types
 import Ormolu.Utils (notImplemented, showOutputable)
 
 -- | Sort and normalize imports.

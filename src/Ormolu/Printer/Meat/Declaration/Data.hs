@@ -13,7 +13,13 @@ where
 
 import Control.Monad
 import Data.Maybe (isJust, maybeToList)
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Parser.Annotation
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type

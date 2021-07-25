@@ -15,7 +15,6 @@ import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
 import qualified Data.Text as T
-import GHC hiding (IE, UnicodeSyntax)
 import GHC.Data.Bag (bagToList)
 import qualified GHC.Data.FastString as GHC
 import qualified GHC.Data.StringBuffer as GHC
@@ -27,6 +26,8 @@ import GHC.LanguageExtensions.Type (Extension (..))
 import qualified GHC.Parser as GHC
 import qualified GHC.Parser.Header as GHC
 import qualified GHC.Parser.Lexer as GHC
+import GHC.Types.SrcLoc
+import GHC.Unit.Module.Name
 import GHC.Utils.Error (Severity (..), errMsgSeverity, errMsgSpan)
 import qualified GHC.Utils.Panic as GHC
 import Ormolu.Config
@@ -167,7 +168,7 @@ runParser ::
   GHC.ParseResult a
 runParser parser flags filename input = GHC.unP parser parseState
   where
-    location = GHC.mkRealSrcLoc (GHC.mkFastString filename) 1 1
+    location = mkRealSrcLoc (GHC.mkFastString filename) 1 1
     buffer = GHC.stringToStringBuffer input
     parseState = GHC.mkPState flags buffer location
 

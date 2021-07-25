@@ -23,7 +23,7 @@ import qualified Data.List as L
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (mapMaybe)
-import qualified GHC
+import qualified GHC.Parser.Annotation as GHC
 import qualified GHC.Parser.Lexer as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Parser.Pragma
@@ -79,7 +79,7 @@ showCommentStream (CommentStream xs) =
   unlines $
     showComment <$> xs
   where
-    showComment (GHC.L l str) = showOutputable l ++ " " ++ show str
+    showComment (L l str) = showOutputable l ++ " " ++ show str
 
 ----------------------------------------------------------------------------
 -- Comment

@@ -10,7 +10,8 @@ where
 
 import Control.Monad
 import qualified Data.Text as T
-import GHC
+import GHC.Hs
+import GHC.Types.SrcLoc
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma

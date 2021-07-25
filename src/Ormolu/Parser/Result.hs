@@ -8,7 +8,8 @@ module Ormolu.Parser.Result
 where
 
 import Data.Text (Text)
-import GHC
+import GHC.Hs
+import GHC.Types.SrcLoc
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
