@@ -17,7 +17,8 @@ let
   };
   ormoluOverlay = self: super: {
     "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
-    "ghc-lib-parser" = pkgs.haskellPackages.ghc-lib-parser_9_0_1_20210324;
+    "ghc-lib-parser" = self.ghc-lib-parser_9_0_1_20210324;
+    "path" = self.path_0_9_0;
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
