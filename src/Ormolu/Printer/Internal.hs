@@ -63,11 +63,11 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Builder
 import GHC
+import GHC.Utils.Outputable (Outputable)
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
-import GHC.Utils.Outputable (Outputable)
 
 ----------------------------------------------------------------------------
 -- The 'R' monad
