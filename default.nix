@@ -19,6 +19,9 @@ let
     "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
     "ghc-lib-parser" = self.ghc-lib-parser_9_0_1_20210324;
     "path" = self.path_0_9_0;
+    # these packages have different versions on GHC 8.8.4 and 8.10.4, and 9.0.1
+    "hlint" = self.hlint_3_3_1;
+    "lens" = self.lens_5_0_1;
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -32,6 +35,7 @@ let
     "idris"
     "intero"
     "leksah"
+    "lens"
     "pandoc"
     "pipes"
     "postgrest"
