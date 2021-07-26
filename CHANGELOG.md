@@ -23,6 +23,8 @@
      452](https://github.com/tweag/ormolu/issues/452).
    * Haddocks on declarations in files without a `module` header are no longer
      deleted. [Issue 480](https://github.com/tweag/ormolu/issues/480).
+   * Due to a change in Haddock parsing, empty Haddock comments on function
+     arguments now get deleted.
 
 ## Ormolu 0.1.4.1
 
