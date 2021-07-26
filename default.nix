@@ -1,6 +1,8 @@
+let defaultCompiler = "ghc8104"; in
+
 { pkgs ? (import ./nix/nixpkgs { inherit system; })
 , system ? builtins.currentSystem
-, ormoluCompiler ? "ghc8104"
+, ormoluCompiler ? defaultCompiler
 }:
 
 let
@@ -45,7 +47,7 @@ let
         if pkgs.lib.lists.any (x: x == name) expectedFailures
           then ./expected-failures + "/${name}.txt"
           else null;
-    }) pkgs.haskellPackages;
+    }) pkgs.haskell.packages.${defaultCompiler};
 in {
   ormolu = haskellPackages.ormolu;
   # We put the derivations in another attribute set to avoid building them
