@@ -1,30 +1,20 @@
-let defaultCompiler = "ghc8104"; in
-
-{ pkgs ? (import ./nix/nixpkgs { inherit system; })
-, system ? builtins.currentSystem
-, ormoluCompiler ? defaultCompiler
+{ ormoluCompiler ? "ghc8105"
 }:
 
 let
-  source = pkgs.lib.sourceByRegex ./. [
-    "^.*\.md$"
-    "^app.*$"
-    "^data.*$"
-    "^ormolu\.cabal$"
-    "^src.*$"
-    "^tests.*$"
-    ];
-  haskellPackages = pkgs.haskell.packages.${ormoluCompiler}.override {
-    overrides = ormoluOverlay;
+  pkgs = import ./nix/pkgs.nix;
+  hsPkgs = pkgs.haskell-nix.project {
+    src = pkgs.haskell-nix.haskellLib.cleanGit {
+      name = "ormolu";
+      src = ./.;
+    };
+    compiler-nix-name = ormoluCompiler;
   };
-  ormoluOverlay = self: super: {
-    "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
-    "ghc-lib-parser" = self.ghc-lib-parser_9_0_1_20210324;
-    "path" = self.path_0_9_0;
-  };
+  ormolu = hsPkgs.ormolu;
+  ormoluExe = ormolu.components.exes.ormolu;
   ormolize = import ./nix/ormolize {
     inherit pkgs;
-    inherit haskellPackages;
+    ormolu = ormoluExe;
   };
   expectedFailures = [
     "Agda"
@@ -47,31 +37,12 @@ let
         if pkgs.lib.lists.any (x: x == name) expectedFailures
           then ./expected-failures + "/${name}.txt"
           else null;
-    }) pkgs.haskell.packages.${defaultCompiler};
+    }) pkgs.haskell.packages.ghc8104;
 in {
-  ormolu = haskellPackages.ormolu;
-  # We put the derivations in another attribute set to avoid building them
-  # when nix-build is run.
-  dev = {
-    ormoluShell =
-      haskellPackages.shellFor {
-        packages = ps: [
-          ps.ormolu
-        ];
-        buildInputs = [
-          haskellPackages.cabal-install
-          haskellPackages.ghcid
-        ];
-      };
-    withOrmolu = haskellPackages.shellFor {
-      packages = ps: [];
-      buildInputs = [
-        haskellPackages.cabal-install
-        haskellPackages.ormolu
-      ];
-    };
-  };
-  inherit ormoluOverlay ormoluCompiler;
+  projectCross = hsPkgs.projectCross;
+  ormoluLib = ormolu.components.library;
+  ormoluTests = ormolu.checks.tests;
+  inherit ormoluExe ormoluCompiler;
   hackage = ormolizedPackages false;
   hackageTests = with pkgs.lib; pkgs.recurseIntoAttrs (
     let ps = [
@@ -121,7 +92,7 @@ in {
     name = "ormolu-region-tests";
     src = ./region-tests;
     buildInputs = [
-      haskellPackages.ormolu
+      ormoluExe
       pkgs.diffutils
     ];
     doCheck = true;
