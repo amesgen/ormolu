@@ -60,7 +60,19 @@ in {
   ormoluLib = ormolu.components.library;
   ormoluTests = ormolu.checks.tests;
   inherit ormoluExe ormoluCompiler;
-  shellFor = hsPkgs.shellFor;
+  dev = {
+    ormoluShell = hsPkgs.shellFor {
+      tools = { cabal = "latest"; };
+      withHoogle = false;
+      exactDeps = true;
+    };
+    withOrmolu = hsPkgs.shellFor {
+      tools = { cabal = "latest"; };
+      withHoogle = false;
+      exactDeps = true;
+      buildInputs = [ormoluExe];
+    };
+  };
   hackage = ormolizedPackages false;
   hackageTests = with pkgs.lib; pkgs.recurseIntoAttrs (
     let ps = [
