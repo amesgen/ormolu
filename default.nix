@@ -150,7 +150,7 @@ in {
       "servant-server"
       "stack"
       "tensorflow"
-      "text_1_2_4_1"
+      "text_1_2_5_0"
       "tls"
       "unpacked-containers"
       "yesod-core"
