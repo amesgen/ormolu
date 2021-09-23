@@ -9,13 +9,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            attr: projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu
             targetOs: Linux
           - os: macOS-latest
-            attr: ormoluExe
             targetOs: macOS
           - os: ubuntu-latest
-            attr: projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu
             targetOs: Windows
     name: Build binary for ${{ matrix.targetOs }}
     runs-on: ${{ matrix.os }}
@@ -27,7 +24,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
             substituters = https://cache.nixos.org https://hydra.iohk.io
       - name: Build binary
-        run: nix-build -A ${{ matrix.attr }}
+        run: nix-build -A binaries.${{ matrix.targetOS }}
       - name: Prepare upload
         run: |
           cd result/bin
@@ -40,3 +37,26 @@ jobs:
           asset_path: ormolu.zip
           asset_name: ormolu-${{ matrix.targetOs }}.zip
           asset_content_type: application/zip
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+    name: Test built binaries
+    runs-on: ${{ matrix.os }}
+    needs: build
+    steps:
+      - name: Download and extract binary
+        run: |
+          wget -q ${{ github.event.release.html_url }}/ormolu-${{ runner.os }}.zip
+          7z e ormolu-${{ runner.os }}.zip
+          chmod +x ormolu
+      - name: Basic functionality tests
+        shell: bash
+        run: |
+          ./ormolu --version
+          echo "data A = A" > test.hs
+          ./ormolu -m check test.hs
