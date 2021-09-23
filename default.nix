@@ -63,7 +63,6 @@ let
             else null;
       }) ormolizablePackages;
 in {
-  projectCross = hsPkgs.projectCross;
   ormoluLib = ormolu.components.library;
   ormoluTests = ormolu.checks.tests;
   ormolu = ormoluExe; # for compatibility
@@ -175,5 +174,22 @@ in {
       mkdir "$out"
       find . -name '*.hs' -exec cp --parents {} $out \;
     '';
+  };
+  binaries = {
+    Linux = hsPkgs.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
+    macOS = pkgs.runCommand "ormolu-macOS" { } ''
+      mkdir -p $out
+      ORMOLU=$out/ormolu
+      cp ${ormoluExe}/bin/ormolu $ORMOLU
+      for f in $(otool -L $ORMOLU | grep /nix/store | cut -d ' ' -f 1 | xargs); do
+        install_name_tool -change $f $(basename $f) $ORMOLU
+        cp $f $out
+      done
+      install_name_tool -add_rpath '@executable_path/..' $ORMOLU
+
+      echo printing Ormolu version...
+      $out/ormolu --version
+    '';
+    Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
 }
