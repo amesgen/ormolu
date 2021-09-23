@@ -2,8 +2,6 @@ name: Build binaries
 on:
   release:
     types: [published]
-  # temporary
-  push:
 jobs:
   build:
     strategy:
@@ -27,10 +25,6 @@ jobs:
             substituters = https://cache.nixos.org https://hydra.iohk.io
       - name: Build binary
         run: nix-build -A binaries.${{ matrix.targetOS }}
-      - if: matrix.targetOs == 'macOS'
-        run: |
-          otool -L result/bin/ormolu
-          result/bin/ormolu --version
       - name: Prepare upload
         run: |
           cd result/bin
@@ -43,3 +37,26 @@ jobs:
           asset_path: ormolu.zip
           asset_name: ormolu-${{ matrix.targetOs }}.zip
           asset_content_type: application/zip
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+    name: Test generated binaries
+    runs-on: ${{ matrix.os }}
+    needs: build
+    steps:
+      - name: Download and extract binary
+        run: |
+          wget -q ${{ github.event.release.upload_url }}/ormolu-${{ runner.os }}.zip
+          7z e ormolu-${{ runner.os }}.zip
+          chmod +x ormolu
+      - name: Basic functionality tests
+        shell: bash
+        run: |
+          ./ormolu --version
+          echo "data A = A" > test.hs
+          ./ormolu -m check test.hs
