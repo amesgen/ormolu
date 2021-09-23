@@ -27,6 +27,10 @@ jobs:
             substituters = https://cache.nixos.org https://hydra.iohk.io
       - name: Build binary
         run: nix-build -A binaries.${{ matrix.targetOS }}
+      - if: matrix.targetOs == 'macOS'
+        run: |
+          otool -L result/bin/ormolu
+          result/bin/ormolu --version
       - name: Prepare upload
         run: |
           cd result/bin

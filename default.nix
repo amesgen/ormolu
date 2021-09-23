@@ -177,18 +177,19 @@ in {
   };
   binaries = {
     Linux = hsPkgs.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
-    macOS = pkgs.runCommand "ormolu-macOS" { } ''
-      mkdir -p $out
-      ORMOLU=$out/ormolu
+    macOS = pkgs.runCommand "ormolu-macOS" {
+      buildInputs = [ pkgs.darwin.cctools ];
+    } ''
+      mkdir -p $out/bin
+      ORMOLU=$out/bin/ormolu
       cp ${ormoluExe}/bin/ormolu $ORMOLU
       for f in $(otool -L $ORMOLU | grep /nix/store | cut -d ' ' -f 1 | xargs); do
-        install_name_tool -change $f $(basename $f) $ORMOLU
-        cp $f $out
+        install_name_tool -change $f "@executable_path/../$(basename $f)" $ORMOLU
+        cp $f $out/bin
       done
-      install_name_tool -add_rpath '@executable_path/..' $ORMOLU
 
       echo printing Ormolu version...
-      $out/ormolu --version
+      $out/bin/ormolu --version
     '';
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
