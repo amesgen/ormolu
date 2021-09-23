@@ -2,6 +2,8 @@ name: Build binaries
 on:
   release:
     types: [published]
+  # temporary
+  push:
 jobs:
   build:
     strategy:
