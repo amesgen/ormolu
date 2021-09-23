@@ -10,8 +10,8 @@ jobs:
         include:
           - os: ubuntu-latest
             targetOs: Linux
-          - os: macOS-latest
-            targetOs: macOS
+          # - os: macOS-latest
+          #   targetOs: macOS
           - os: ubuntu-latest
             targetOs: Windows
     name: Build binary for ${{ matrix.targetOs }}
@@ -43,7 +43,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-latest
+          # - macOS-latest
           - windows-latest
     name: Test built binaries
     runs-on: ${{ matrix.os }}
@@ -53,9 +53,7 @@ jobs:
         run: |
           curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/ormolu-${{ runner.os }}.zip > ormolu.zip
           7z e ormolu.zip
-          chmod +x ormolu
       - name: Basic functionality tests
-        shell: bash
         run: |
           ./ormolu --version
           echo "data A = A" > test.hs
