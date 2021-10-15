@@ -1,6 +1,6 @@
 let
   macdylibbundler = self: super: {
-    macdylibbundler = super.macdylibbundler.override {
+    macdylibbundler = super.macdylibbundler.overrideAttrs (old: {
       version = "20210804";
       src = super.fetchFromGitHub {
         owner = "auriamg";
@@ -8,9 +8,11 @@ let
         rev = "5a6413cc4ea688ed59209b062f05aef092ee4585";
         sha256 = "1wvfycdsysji5j4g3lr1dwk3hbnai8pibhajnfya9vy219clp281";
       };
-    };
+    });
   };
   sources = import ./sources.nix { };
   haskellNix = import sources.haskellNix { };
-  pkgs = import haskellNix.sources.nixpkgs-unstable haskellNix.nixpkgsArgs;
-in pkgs
+  inherit (haskellNix) nixpkgsArgs;
+in
+import haskellNix.sources.nixpkgs-unstable
+  (nixpkgsArgs // { overlays = nixpkgsArgs.overlays ++ [ macdylibbundler ]; })
