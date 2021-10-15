@@ -181,7 +181,7 @@ in {
   binaries = {
     Linux = hsPkgs.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
     macOS = pkgs.runCommand "ormolu-macOS" {
-      buildInputs = [ pkgs.macdylibbundler ];
+      buildInputs = [ pkgs.macdylibbundler pkgs.darwin.cctools ];
     } ''
       mkdir -p $out/bin
       cp ${ormoluExe}/bin/ormolu $out/bin/ormolu
