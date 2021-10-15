@@ -191,9 +191,7 @@ in {
       dylibbundler -b \
         -x $out/bin/ormolu \
         -d $out/bin \
-        -p '@executable_path' \
-        -i /usr/lib/system \
-        -i ${pkgs.darwin.Libsystem}/lib
+        -p '@executable_path'
     '';
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
