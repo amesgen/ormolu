@@ -1,3 +1,10 @@
 packages: .
 
 constraints: ormolu +dev
+
+source-repository-package
+  type: git
+  location: https://github.com/patrickdoc/cabal
+  tag: 0fc071cb2ef530ef103a4d651ffdebf15f17bd6e
+  subdir: Cabal-syntax
+  --sha256: 14pn2qls6pxa0didklf0ag5jy3wfrf0kmwirskrlgfqb2m7pgxch

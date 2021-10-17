@@ -21,6 +21,7 @@ import qualified Distribution.ModuleName as ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parsec
 import qualified Distribution.Types.CondTree as CT
+import Distribution.Utils.Path
 import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
@@ -60,12 +61,13 @@ getExtensionsFromCabalFile cabalFile = liftIO $ do
       where
         prependSrcDirs f
           | null hsSourceDirs = [f]
-          | otherwise = (</> f) <$> hsSourceDirs
+          | otherwise = (</> f) . getSymbolicPath <$> hsSourceDirs
         exts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions
         langExt =
           pure . DynOption . \case
             Haskell98 -> "-XHaskell98"
             Haskell2010 -> "-XHaskell2010"
+            GHC2021 -> "-XGHC2021"
             UnknownLanguage lan -> "-X" ++ lan
         extToDynOption =
           DynOption . \case
