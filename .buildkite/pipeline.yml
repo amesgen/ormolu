@@ -7,6 +7,10 @@ steps:
     command: |
       nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc901
     timeout: 100
+  - label: Build and test with GHC 9.2.1
+    command: |
+      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc921
+    timeout: 100
   - wait
   - label: Check formatting
     command: |
