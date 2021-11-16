@@ -12,12 +12,12 @@ let
         };
       });
       macdylibbundler = super.macdylibbundler.overrideAttrs (old: {
-        version = "20180825";
+        version = "test";
         src = super.fetchFromGitHub {
-          owner = "auriamg";
+          owner = "amesgen";
           repo = "macdylibbundler";
-          rev = "ce13cb585ead5237813b85e68fe530f085fc0a9e";
-          sha256 = "149p3dcnap4hs3nhq5rfvr3m70rrb5hbr5xkj1h0gsfp0d7gvxnj";
+          rev = "f98d06980e718947b1d4afed3586f475056563b6";
+          sha256 = "0qqgcp14vvr6r5yqj96hy3klc2dkcqyq909az30ql4y879r3xm62";
         };
       });
     })
