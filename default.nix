@@ -214,7 +214,7 @@ in {
   binaries = {
     Linux = hsPkgs.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
     macOS = pkgs.runCommand "ormolu-macOS" {
-      buildInputs = [ pkgs.macdylibbundler ];
+      buildInputs = [ pkgs.macdylibbundler pkgs.removeReferencesTo ];
     } ''
       mkdir -p $out/bin
       cp ${ormoluExe}/bin/ormolu $out/bin/ormolu
@@ -223,6 +223,9 @@ in {
         -x $out/bin/ormolu \
         -d $out/bin \
         -p '@executable_path'
+      remove-references-to \
+        -t ${pkgs.libiconv} \
+        $out/bin/ormolu
     '';
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
