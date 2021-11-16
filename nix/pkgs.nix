@@ -11,6 +11,15 @@ let
           sha256 = "733f00f0a1651c9d5409d9162e6f94f0a3e61463628925d3d6ef66be60ec14a6";
         };
       });
+      macdylibbundler = super.macdylibbundler.overrideAttrs (old: {
+        version = "20201008";
+        src = super.fetchFromGitHub {
+          owner = "auriamg";
+          repo = "macdylibbundler";
+          rev = "dd677cec46b1eb8f096906d71c67572de491e8c2";
+          sha256 = "0vh9snyiw17yva2dx2snxwwgxbylirhpcdiz5lk06x9zknm1lzvp";
+        };
+      });
     })
   ];
 in
