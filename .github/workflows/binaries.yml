@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-latest
             targetOs: Linux
-          - os: macOS-10.15
+          - os: macOS-11
             targetOs: macOS
           - os: ubuntu-latest
             targetOs: Windows
