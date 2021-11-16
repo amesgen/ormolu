@@ -215,6 +215,7 @@ in {
     Linux = hsPkgs.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
     macOS = pkgs.runCommand "ormolu-macOS" {
       buildInputs = [ pkgs.macdylibbundler pkgs.removeReferencesTo ];
+      allowedRequisites = [];
     } ''
       mkdir -p $out/bin
       cp ${ormoluExe}/bin/ormolu $out/bin/ormolu
