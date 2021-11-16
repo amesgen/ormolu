@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
@@ -22,6 +21,7 @@ import qualified Distribution.ModuleName as ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parsec
 import qualified Distribution.Types.CondTree as CT
+import Distribution.Utils.Path (getSymbolicPath)
 import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
@@ -29,10 +29,6 @@ import System.Directory
 import System.FilePath
 import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
-
-#if MIN_VERSION_Cabal(3,6,0)
-import Distribution.Utils.Path (getSymbolicPath)
-#endif
 
 -- | Get a map from Haskell source file paths (without any extensions)
 -- to its default language extensions
@@ -94,10 +90,6 @@ getExtensionsFromCabalFile cabalFile = liftIO $ do
         mainPath = case benchmarkInterface of
           BenchmarkExeV10 _ p -> [p]
           BenchmarkUnsupported {} -> []
-
-#if !(MIN_VERSION_Cabal(3,6,0))
-    getSymbolicPath = id
-#endif
 
 -- | Find the path to an appropriate .cabal file for a Haskell
 -- source file, if available
