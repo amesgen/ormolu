@@ -22,9 +22,6 @@ import qualified Distribution.ModuleName as ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parsec
 import qualified Distribution.Types.CondTree as CT
-#if MIN_VERSION_Cabal(3,6,0)
-import Distribution.Utils.Path (getSymbolicPath)
-#endif
 import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
@@ -32,6 +29,10 @@ import System.Directory
 import System.FilePath
 import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
+
+#if MIN_VERSION_Cabal(3,6,0)
+import Distribution.Utils.Path (getSymbolicPath)
+#endif
 
 -- | Get a map from Haskell source file paths (without any extensions)
 -- to its default language extensions

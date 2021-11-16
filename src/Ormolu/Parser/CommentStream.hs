@@ -48,12 +48,12 @@ import Ormolu.Utils (onTheSameLine, showOutputable)
 newtype CommentStream = CommentStream [RealLocated Comment]
   deriving (Eq, Data, Semigroup, Monoid)
 
--- | Create 'CommentStream' from 'PState'. The pragmas are
+-- | Create 'CommentStream' from 'HsModule'. The pragmas are
 -- removed from the 'CommentStream'.
 mkCommentStream ::
   -- | Original input
   String ->
-  -- | Parser state to use for comment extraction
+  -- | Module to use for comment extraction
   HsModule ->
   -- | Stack header, pragmas, and comment stream
   ( Maybe (RealLocated Comment),

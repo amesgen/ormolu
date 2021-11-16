@@ -7,7 +7,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns #-}
-{-# OPTIONS_GHC -Wno-incomplete-record-updates #-}
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult
@@ -154,7 +153,7 @@ matchIgnoringSrcSpans a = genericQuery a
     layoutInfoEq _ (cast -> Just (_ :: LayoutInfo)) = Same
     layoutInfoEq _ _ = Different []
     classDeclCtxEq :: TyClDecl GhcPs -> GenericQ ParseResultDiff
-    classDeclCtxEq tc@ClassDecl {tcdCtxt = Just (L _ [])} tc' = genericQuery tc {tcdCtxt = Nothing} tc'
+    classDeclCtxEq ClassDecl {tcdCtxt = Just (L _ []), ..} tc' = genericQuery ClassDecl {tcdCtxt = Nothing, ..} tc'
     classDeclCtxEq tc tc' = genericQuery tc tc'
     derivedTyClsParensEq :: DerivClauseTys GhcPs -> GenericQ ParseResultDiff
     derivedTyClsParensEq (DctSingle NoExtField sigTy) dct' = genericQuery (DctMulti NoExtField [sigTy]) dct'
