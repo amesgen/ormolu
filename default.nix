@@ -225,7 +225,7 @@ in {
         -p '@executable_path'
       remove-references-to \
         -t ${pkgs.libiconv} \
-        $out/bin/ormolu
+        $out/bin/*
     '';
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
