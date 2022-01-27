@@ -215,7 +215,7 @@ in {
       mkdir -p $out/bin
       cp ${ormoluExe}/bin/ormolu $out/bin/ormolu
       chmod 755 $out/bin/ormolu
-      dylibbundler -b \
+      dylibbundler -ns -b \
         -x $out/bin/ormolu \
         -d $out/bin \
         -p '@executable_path'

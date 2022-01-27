@@ -9,8 +9,8 @@ let
         src = super.fetchFromGitHub {
           owner = "amesgen";
           repo = "macdylibbundler";
-          rev = "f98d06980e718947b1d4afed3586f475056563b6";
-          sha256 = "0qqgcp14vvr6r5yqj96hy3klc2dkcqyq909az30ql4y879r3xm62";
+          rev = "befc879d5ee812edc8f703de1a008ca0ddecf2b1";
+          sha256 = "1wm4m19gc3ik79385ayy3y0jaa2alc303xjd1yskjl029q15ffa9";
         };
       });
     })
