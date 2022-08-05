@@ -20,8 +20,8 @@ jobs:
     name: Build binary for ${{ matrix.targetOs }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: cachix/install-nix-action@v15
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v17
         with:
           extra_nix_config: |
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
@@ -32,22 +32,19 @@ jobs:
         run: |
           cd result/bin
           7z a -l ${{ github.workspace }}/ormolu.zip .
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ormolu.zip
           asset_name: ormolu-${{ matrix.targetOs }}.zip
-          asset_content_type: application/zip
   test:
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
-          - macOS-10.15
           - macOS-11
+          - macOS-12
           - windows-latest
     name: Test built binaries
     runs-on: ${{ matrix.os }}
@@ -55,7 +52,7 @@ jobs:
     steps:
       - name: Download and extract binary
         run: |
-          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/ormolu-${{ runner.os }}.zip > ormolu.zip
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/ormolu-${{ runner.os }}.zip > ormolu.zip
           7z e ormolu.zip
       - name: Basic functionality tests
         run: |
