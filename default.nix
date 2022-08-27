@@ -261,7 +261,7 @@ in {
       buildInputs = [ pkgs.macdylibbundler ];
     } ''
       mkdir -p $out/bin
-      cp ${hsPkgsOpt.ormolu.components.exes.ormolu}/bin/ormolu $out/bin/ormolu
+      cp ${hsPkgsOpt.hsPkgs.ormolu.components.exes.ormolu}/bin/ormolu $out/bin/ormolu
       chmod 755 $out/bin/ormolu
       dylibbundler -b \
         -x $out/bin/ormolu \
