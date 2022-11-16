@@ -10,5 +10,17 @@
         "type": "tarball",
         "url": "https://github.com/input-output-hk/haskell.nix/archive/4b252a25630910f47fd2961dd3545efd01178980.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "nix-bundle-exe": {
+        "branch": "main",
+        "description": "Simple Nix derivations to bundle executables",
+        "homepage": null,
+        "owner": "3noch",
+        "repo": "nix-bundle-exe",
+        "rev": "91416cec283a33ae3448aacdc5cabdece9c08793",
+        "sha256": "1w07y0gqi60if8vfw2vwn8nzkzz8diarigamjcr4lmm3f3zrk4bh",
+        "type": "tarball",
+        "url": "https://github.com/3noch/nix-bundle-exe/archive/91416cec283a33ae3448aacdc5cabdece9c08793.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
