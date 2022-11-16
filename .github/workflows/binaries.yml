@@ -53,6 +53,9 @@ jobs:
         run: |
           curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/ormolu-${{ runner.os }}.zip > ormolu.zip
           7z e ormolu.zip
+      - run: |
+          ln -s bin/ormolu ormolu
+        if: runner.os == 'macOS'
       - name: Basic functionality tests
         run: |
           ./ormolu --version
