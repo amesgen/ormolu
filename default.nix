@@ -257,17 +257,11 @@ in {
     }];
   }; in {
     Linux = hsPkgsOpt.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
-    macOS = pkgs.runCommand "ormolu-macOS" {
-      buildInputs = [ pkgs.macdylibbundler ];
-    } ''
-      mkdir -p $out/bin
-      cp ${hsPkgsOpt.hsPkgs.ormolu.components.exes.ormolu}/bin/ormolu $out/bin/ormolu
-      chmod 755 $out/bin/ormolu
-      dylibbundler -b \
-        -x $out/bin/ormolu \
-        -d $out/bin \
-        -p '@executable_path'
-    '';
+    macOS =
+      pkgs.runCommand
+        (import ./sources.nix { }).nix-bundle-exe
+        {}
+        hsPkgsOpt.hsPkgs.ormolu.components.exes.ormolu;
     Windows = hsPkgsOpt.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
 } // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc92" ormoluCompiler) {
