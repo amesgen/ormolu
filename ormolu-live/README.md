@@ -7,12 +7,12 @@ Play around with ormolu in the browser via GHCJS!
 ### Building the site with GHCJS
 
 ```
-nix-build -A ormoluLive.website
+nix build .#ormoluLive/website
 ```
 
 ### Local development with JSaddle
 
-In a `nix-shell` (or if you have cabal installed), run
+In a Nix shell (or if you have cabal installed), run
 
 ```
 ghcid -r -W

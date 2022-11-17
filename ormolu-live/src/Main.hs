@@ -6,14 +6,14 @@ import Data.Foldable (toList)
 import Data.Functor (void)
 import Data.Generics.Labels ()
 import Data.List (intersperse)
-import Data.Maybe (maybeToList)
+import Data.Maybe (fromMaybe, maybeToList)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Development.GitRev
 import GHC.Driver.Ppr (showSDocUnsafe)
 import GHC.Generics (Generic)
 import qualified GHC.Hs.Dump as Dump
 import GHC.SyntaxHighlighter
+import Language.Haskell.TH.Env (envQ)
 import qualified Language.Javascript.JSaddle.Warp.Extra as JSaddleWarp
 import Miso
 import Miso.String (MisoString, fromMisoString, ms)
@@ -105,8 +105,8 @@ viewModel model@Model {..} =
                 []
                 [ text $ "Version " <> VERSION_ormolu <> ", commit ",
                   a_
-                    [href_ $ "https://github.com/tweag/ormolu/commit/" <> $gitHash, target_ "blank"]
-                    [span_ [class_ "is-family-code"] [text . ms . T.take 7 $ $gitHash]],
+                    [href_ $ "https://github.com/tweag/ormolu/commit/" <> ms gitRev, target_ "blank"]
+                    [span_ [class_ "is-family-code"] [text . ms . T.take 7 $ gitRev]],
                   text $ ", using ghc-lib-parser " <> VERSION_ghc_lib_parser
                 ],
               p_
@@ -270,3 +270,6 @@ extractOrmoluException = \case
 -- ratio threshold, and an empty list of dependencies.
 defaultFixityMap :: LazyFixityMap
 defaultFixityMap = buildFixityMap defaultStrategyThreshold mempty
+
+gitRev :: Text
+gitRev = fromMaybe (T.pack "master") $$(envQ "ORMOLU_REV")

@@ -28,7 +28,7 @@ executable ormolu-live
         generic-lens ^>=2.2,
         ghc-lib-parser,
         ghc-syntax-highlighter,
-        gitrev >=1.3 && <1.4,
+        th-env >=0.1.1 && <0.2,
         lens ^>=5.0,
         miso ^>=1.8,
         ormolu,

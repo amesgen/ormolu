@@ -1,6 +1,5 @@
-#!/usr/bin/env nix-shell
-#!nix-shell default.nix -A dev.cabalAndOrmolu -i bash --pure
-#
+#!/usr/bin/env bash
+
 # Format Ormolu using current version of Ormolu.
 
 set -e
