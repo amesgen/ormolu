@@ -8,6 +8,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
+
+    # for Ormolu Live
+    ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
+    npmlock2nix = { url = "github:nix-community/npmlock2nix"; flake = false; };
+    ps-tools = {
+      follows = "purs-nix/ps-tools";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    purs-nix = {
+      url = "github:purs-nix/purs-nix/ps-0.15";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = inputs@{ self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -97,13 +109,73 @@
           hooks = {
             nixpkgs-fmt.enable = true;
             deadnix.enable = true;
+            purs-tidy.enable = true;
           };
+          tools = { inherit (ormoluLive) purs-tidy; };
         };
+
+        ormoluLive =
+          let
+            npmlock2nix = (pkgs.callPackage inputs.npmlock2nix { }).v2;
+            ps-tools = inputs.ps-tools.legacyPackages.${system}.for-0_15;
+            purs-nix = inputs.purs-nix { inherit system; };
+            ps = purs-nix.purs {
+              dependencies = [ "halogen" "ace" "profunctor-lenses" ];
+              dir = ./ormolu-live;
+            };
+            es-opt = npmlock2nix.build {
+              src = ./ormolu-live;
+              installPhase = "cp -r output-es $out";
+              buildCommands = lib.singleton ''
+                purs-backend-es build --int-tags \
+                  --corefn-dir ${ps.output { codegen = "corefn"; }}
+              '';
+            };
+            metadata = builtins.toJSON {
+              inherit (self.packages.${system}.default) version;
+              inherit (self) rev;
+              ghcAPIVersion =
+                defaultGHC.dev.hsPkgs.ghc-lib-parser.components.library.version;
+            };
+            ghcWasmDeps = [
+              inputs.ghc-wasm-meta.packages.${system}.default
+              pkgs.haskellPackages.happy
+              pkgs.haskellPackages.alex
+            ];
+          in
+          {
+            package = npmlock2nix.build {
+              src = ./ormolu-live;
+              installPhase = "cp -r dist $out";
+              buildCommands = lib.optional (self ? rev) ''
+                echo ${lib.escapeShellArg metadata} > src/meta.json
+              '' ++ lib.singleton ''
+                cp -r ${es-opt} output
+                date > src/ormolu.wasm
+                cp --remove-destination \
+                  ${./extract-hackage-info/hackage-info.bin} src/hackage-info.bin
+                parcel build --no-source-maps www/index.html
+              '';
+            };
+            shell = npmlock2nix.shell {
+              src = ./ormolu-live;
+              buildInputs = [
+                pkgs.nodejs
+                pkgs.watchexec
+                (ps.command { })
+                ps-tools.purs-tidy
+                ps-tools.purescript
+              ] ++ ghcWasmDeps;
+            };
+            ghcWasmShell = pkgs.mkShell { packages = [ ghcWasmDeps ]; };
+            inherit (ps-tools) purs-tidy;
+          };
       in
       {
         packages = flake-utils.lib.flattenTree {
           inherit binaries pre-commit-check;
           default = defaultGHC.ormolu;
+          ormoluLive = ormoluLive.package;
         };
         apps = {
           default = flake-utils.lib.mkApp {
@@ -135,6 +207,8 @@
             exactDeps = false;
             inherit (pre-commit-check) shellHook;
           };
+          ormoluLive = ormoluLive.shell;
+          ghcWasm = ormoluLive.ghcWasmShell;
         };
         legacyPackages = defaultGHC // perGHC;
       });
