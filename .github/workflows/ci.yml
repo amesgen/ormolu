@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - 'master'
+      - 'amesgen/ormolu-live-wasm'
 jobs:
   ci:
     strategy:
@@ -112,6 +112,6 @@ jobs:
           enable-commit-comment: false
           enable-commit-status: true
       - name: Deploy to Netlify, production
-        if: env.NETLIFY_AUTH_TOKEN != '' && github.ref == 'refs/heads/master'
+        if: env.NETLIFY_AUTH_TOKEN != '' && github.ref == 'refs/heads/amesgen/ormolu-live-wasm'
         run: |
           netlify deploy --prod -d ./frontend
