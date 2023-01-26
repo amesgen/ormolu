@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - amesgen/update-flake-inputs
   pull_request:
     types:
       - opened
