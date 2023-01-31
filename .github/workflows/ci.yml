@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - amesgen/stack-ci
   pull_request:
     types:
       - opened
