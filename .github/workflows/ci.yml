@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - amesgen/wizer-preinit
   pull_request:
     types:
       - opened
