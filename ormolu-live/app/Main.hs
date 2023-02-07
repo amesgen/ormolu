@@ -2,12 +2,15 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
 import Control.Exception qualified as E
+import Control.Monad (guard)
 import Data.Aeson qualified as A
+import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Unsafe qualified as BU
 import Data.Text (Text)
@@ -49,12 +52,16 @@ formatRaw inputPtr inputLen outputPtrPtr = do
     copyBytes outputPtr buf len
     pure len
 
-foreign export ccall initFixityDB :: Ptr CChar -> Int -> IO ()
+foreign export ccall initFixityDB :: IO ()
 
-initFixityDB :: Ptr CChar -> Int -> IO ()
-initFixityDB ptr len = do
-  let IntPtr ptr' = ptrToIntPtr ptr
-  setEnv "ORMOLU_HACKAGE_INFO" $ show (ptr', len)
+initFixityDB :: IO ()
+initFixityDB = do
+  bs <- B.readFile "hackage-info.bin"
+  BU.unsafeUseAsCStringLen bs \(ptr, len) -> do
+    let IntPtr ptr' = ptrToIntPtr ptr
+    setEnv "ORMOLU_HACKAGE_INFO" $ show (ptr', len)
+    out <- ormolu defaultConfig "" "1+++++++1"
+    guard $ out == "1 +++++++ 1\n"
 
 -- actual logic
 
