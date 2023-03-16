@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - amesgen/ghc-9.6
   pull_request:
     types:
       - opened
