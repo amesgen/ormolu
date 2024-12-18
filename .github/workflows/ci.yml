@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - amesgen/update-ghcs-and-co
   pull_request:
     types:
       - opened
