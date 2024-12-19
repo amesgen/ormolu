@@ -47,7 +47,8 @@ jobs:
       - name: Prepare upload
         run: |
           cd result/bin
-          7z a -l ${{ github.workspace }}/ormolu.zip .
+          nix run --inputs-from . nixpkgs#p7zip -- \
+            a -l ${{ github.workspace }}/ormolu.zip .
       - uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
